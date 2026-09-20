@@ -23,6 +23,18 @@ The later bridge and launch files should not be interpreted as a successful hard
 
 These are lessons and proposed improvements to the experimental process. No new success rate, tracking-error measurement, or root-cause diagnosis is added here.
 
-## Evidence to add if available
+## Source-based diagnostic guide
 
-A CARLA recording or plot showing the unstable tracking would help explain the debugging work. Useful accompanying details are the route, command/trajectory traces, parameter values and observed change. The repository currently presents code and the author's outcome record without a placeholder for an unavailable success video.
+The following separates visible implementation from questions that would need a new, controlled experiment. It does not reconstruct missing historical results.
+
+| Source behavior | Concrete inspection point | What a new experiment would need to resolve |
+| --- | --- | --- |
+| Pure Pursuit uses target x/y and wheelbase | `compute_steering_angle_rad` in the [steering node](../src/neuro_decision/neuro_decision/steering_command_node.py) | Target frame, sign, and expected turn direction for fixed left/right targets |
+| Steering is smoothed and change-limited | EMA and `delta_per_cycle` in `publish_steering_commands` | Raw versus filtered command over time, with the update period held fixed |
+| Degrees and normalized commands are both published | `update_degree_output_from_filtered_normalized` | Scale agreement between the producer and each consumer |
+| Stale or unknown input states produce zero steering | Timeout and state branches in the steering node | Whether input age or state transitions coincide with tracking interruptions |
+| Desired commands are serialized separately | [MCU bridge](../src/vehicle_serial_bridge/vehicle_serial_bridge/mcu_serial_bridge.py) | Requested command versus transmitted packet and measured actuator response |
+
+## Available evidence
+
+The project author confirmed that historical footage and logs are unavailable. The public record therefore consists of the preserved source, the development account, and the outcome above. No trajectory plot, before/after result, or success video is reconstructed. A future reimplementation would be a new experiment and should be labeled with its own date and source version.
